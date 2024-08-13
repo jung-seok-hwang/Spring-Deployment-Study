@@ -44,8 +44,6 @@ class FluxAndMonoGeneratorServiceTest {
                 .verifyComplete();
     }
 
-
-
     @Test
     void nameFluxToUpperCase() {
         //given
@@ -56,24 +54,53 @@ class FluxAndMonoGeneratorServiceTest {
 
         //then
         StepVerifier.create(namedFluxToUpperCase)
-                .expectNext("ALEX","JOB","HEP","BEN")
+                .expectNext("ALEX", "JOB", "HEP", "BEN")
                 .verifyComplete();
-
     }
 
     @Test
     void fluxFilter() {
         //given
-        List<String> list = List.of("ale", "job","deadpool", "hep", "ben", "venom");
+        List<String> list = List.of("ale", "job", "deadpool", "hep", "ben", "venom");
 
         //when
-        var namedFluxToUpperCase = flux.fluxFilter(list , 3);
+        var namedFluxToUpperCase = flux.fluxFilter(list, 3);
 
         Flux<String> log = namedFluxToUpperCase.filter(str -> str.length() == 8).log();
 
         //then
         StepVerifier.create(log)
                 .expectNext("DEADPOOL")
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("")
+    void fluxFlatMap() {
+        //given
+        List<String> list = List.of("ale", "job","liam", "hep", "ben", "venom");
+
+        //when
+        var namedFluxToUpperCase = flux.fluxFlatMap(list, 3);
+
+        //then
+        StepVerifier.create(namedFluxToUpperCase)
+                .expectNext("l", "i", "a", "m", "v", "e", "n", "o","m")
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("")
+    void fluxFlatMapAsync() {
+        //given
+        List<String> list = List.of("ale", "job", "liam", "hep", "ben", "venom");
+
+        //when
+        var namedFluxToUpperCase = flux.fluxFlatMapAsynchronous(list, 3);
+
+        //then
+        StepVerifier.create(namedFluxToUpperCase)
+                .expectNextCount(9)
                 .verifyComplete();
     }
 
