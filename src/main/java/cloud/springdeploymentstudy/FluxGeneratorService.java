@@ -36,28 +36,29 @@ public class FluxGeneratorService {
     public Flux<String> fluxFlatMap(List<String> list, int length) {
         return Flux.fromIterable(list)
                 .filter(str -> str.length() > length)
-                .flatMap(this::splitNameIntoCharacters)
+                .flatMap(name -> splitNameIntoCharacters(name))
                 .log();
     }
 
     public Flux<String> fluxFlatMapAsynchronous(List<String> list, int length) {
         return Flux.fromIterable(list)
-                .filter(str -> str.length() > length)
-                .flatMap(str -> nameLength(str , length))
-                .doOnNext(n -> log.info("Done {}", n));
+                .flatMap(str -> nameLength(str, length)
+                        .filter(ignored -> str.length() > length)
+                ).doOnNext(n -> log.info("flatMap Done {}", n));
     }
 
     public Flux<String> fluxConcatMapAsynchronous(List<String> list, int length) {
         return Flux.fromIterable(list)
-                .concatMap(str -> nameLength(str , length))
-                .doOnNext(n -> log.info("Done {}", n));
+                .concatMap(str -> nameLength(str , length)
+                        .filter(ignored -> ignored.length() > length))
+                .doOnNext(n -> log.info("concatMap Done {}", n));
     }
 
     public Flux<String> fluxFlatMapSequentialAsynchronous(List<String> list, int length) {
         return Flux.fromIterable(list)
-                .filter(str -> str.length() > length) //3개를 방출 하고
-                .flatMapSequential(this::splitNameIntoCharactersWithDelay)
-                .log();
+                .flatMapSequential(name -> nameLength(name , length)
+                        .filter(ignored -> ignored.length() > length))
+                .doOnNext(n -> log.info("flatMapSequential Done {}", n));
     }
 
     public Flux<String> splitNameIntoCharacters(String name) {
@@ -76,15 +77,10 @@ public class FluxGeneratorService {
 
     public Mono<String> nameLength(String name ,Integer length) {
 
+        var delay = new Random().nextInt(10000);
+
         return name.length() > length ?
-                Mono.just(name).doOnNext(n -> log.info("Executing {}", n)).delayElement(Duration.ofSeconds(1))
+                Mono.just(name).doOnNext(n -> log.info("Delayed {}", n)).delayElement(Duration.ofMillis(delay))
                 : Mono.just(name).doOnNext(n -> log.info("Executing {}", n));
-
     }
-
-//    private Mono<Integer> doSomethingAsync(Integer number) {
-//        //add some delay for the second item...
-//        return number == 2 ? Mono.just(number).doOnNext(n -> log.info("Executing {}", n)).delayElement(Duration.ofSeconds(1))
-//                : Mono.just(number).doOnNext(n -> log.info("Executing {}", n));
-//    }
 }
