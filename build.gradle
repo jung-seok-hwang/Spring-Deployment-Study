@@ -26,8 +26,8 @@ repositories {
 }
 
 dependencies {
-    implementation 'io.projectreactor:reactor-core:3.6.7'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'io.projectreactor:reactor-core:3.6.7'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -35,6 +35,23 @@ dependencies {
 
     testImplementation 'io.projectreactor:reactor-test:3.6.8'
 
+    //Test Code Slf4j 설정
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+}
+
+test{
+    useJUnitPlatform()
+}
+/**
+    src/test/java/unit: 단위 테스트(Unit Test) 코드를 위한 디렉토리
+    src/test/java/intg: 통합 테스트(Integration Test) 코드를 위한 디렉토리
+ **/
+sourceSets {
+    test {
+        java.srcDirs = ['src/test/java/unit' ,
+                        'src/test/java/intg']
+    }
 }
 
 java.sourceCompatibility = JavaVersion.VERSION_17
